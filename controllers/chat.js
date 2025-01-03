@@ -13,11 +13,30 @@ export const postChat = async (req, res) => {
         ]
 
         for (const message of data.messages) {
+            const content_parts = [];
+            if (message.content) {
+                content_parts.push({
+                    type: "text",
+                    text: message.content
+                });
+            }
+            if (message.image_data) {
+                for (const image_data_base64 of message.image_data) {
+                    content_parts.push({
+                        type: "image_url",
+                        image_url: {
+                            url: `data:image/png;base64,${image_data_base64}`
+                        }
+                    });
+                }
+            }
             formatted_messages.push({
                 role: message.role,
-                content: message.content
-            })
+                content: content_parts
+            });
         }
+
+        console.log(JSON.stringify(formatted_messages, null, 2))
 
         const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
